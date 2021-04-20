@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreUpdatePost as RequestsStoreUpdatePost;
 use App\Models\Post;
 use Illuminate\Http\Request;
 
@@ -27,6 +28,7 @@ class PostController extends Controller
     public function create()
     {
         //
+
         return view('admin.posts.create');
     }
 
@@ -36,7 +38,7 @@ class PostController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(RequestsStoreUpdatePost $request)
     {
 
         /*dd($request->all());
@@ -46,7 +48,6 @@ class PostController extends Controller
         $post->save();*/
         Post::create($request->all());
         return redirect()->route('posts.index');
-
     }
 
     /**
@@ -55,9 +56,12 @@ class PostController extends Controller
      * @param  \App\Models\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function show(Post $post)
+    public function show($id)
     {
-        //
+        if(!$post = Post::find($id)){
+            return redirect()->route('posts.index');
+        }
+        return view('admin.posts.show', compact('post'));
     }
 
     /**
@@ -89,8 +93,16 @@ class PostController extends Controller
      * @param  \App\Models\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Post $post)
+    public function destroy($id)
     {
-        //
+
+        if(!$post = Post::find($id)){
+            return redirect()->route('posts.index');
+        }
+        $post->delete();
+
+        return redirect()
+                        ->route('posts.index')
+                        ->with('message', 'Post deletado com sucesso!');
     }
 }
