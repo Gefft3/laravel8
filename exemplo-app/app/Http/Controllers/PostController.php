@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreUpdatePost as RequestsStoreUpdatePost;
+use App\Http\Requests\StoreUpdatePost;
 use App\Models\Post;
 use Illuminate\Http\Request;
 
@@ -15,7 +15,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::get();
+        $posts = Post::latest()->paginate();
         //
         return view('admin.posts.index', compact('posts'));
     }
@@ -38,7 +38,7 @@ class PostController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(RequestsStoreUpdatePost $request)
+    public function store(StoreUpdatePost $request)
     {
 
         /*dd($request->all());
@@ -47,7 +47,9 @@ class PostController extends Controller
         $post->content=$request->content;
         $post->save();*/
         Post::create($request->all());
-        return redirect()->route('posts.index');
+        return redirect()
+                        ->route('posts.index')
+                        ->with('message', 'Post criado com sucesso!');
     }
 
     /**
@@ -70,9 +72,13 @@ class PostController extends Controller
      * @param  \App\Models\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function edit(Post $post)
+    public function edit($id)
     {
-        //
+        //caso tente burlar a url
+        if (!$post = Post::find($id)){
+            return redirect()->route('posts.index');
+        }
+        return view('admin.posts.edit', compact('post'));
     }
 
     /**
@@ -82,9 +88,16 @@ class PostController extends Controller
      * @param  \App\Models\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Post $post)
+    public function update(StoreUpdatePost $request, $id)
     {
-        //
+        //        //caso tente burlar a url
+        if (!$post = Post::find($id)){
+            return redirect()->route('posts.index');
+        }
+        $post->update($request->all());
+        return redirect()
+                        ->route('posts.index')
+                        ->with('message', 'Post editado com sucesso!');
     }
 
     /**
@@ -104,5 +117,9 @@ class PostController extends Controller
         return redirect()
                         ->route('posts.index')
                         ->with('message', 'Post deletado com sucesso!');
+    }
+    public function search(Request $request){
+
+        dd("ta caindo aq {$request->search}");
     }
 }
