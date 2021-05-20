@@ -7,9 +7,11 @@
     </div>
 @endif
 
+
+
 <form action="{{ route('posts.search') }}" method="post">
     @csrf
-    <input type="text" name="search" placeholder="Pesquisar:">
+    <input type="text" name="search" placeholder="Pesquisar: ">
     <button type="submit">Pesquisar</button>
 </form>
 
@@ -24,4 +26,11 @@
 
 <hr>
 
-{{$posts->links()}}
+@if (isset($filters))
+    {{$posts->appends($filters)->links()}}
+@else
+    {{$posts->links()}}
+@endif
+
+
+
