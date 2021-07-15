@@ -1,3 +1,6 @@
+@extends('admin.layouts.app')
+@section('title','Listagem dos Posts')
+@section('content')
 <a href="{{ route('posts.create') }}">Criar Novo Post</a>
 <hr>
 
@@ -18,7 +21,10 @@
 <h1>Posts</h1>
 
 @foreach ($posts as $post)
-    <p>{{$post->title}}
+
+    <p>
+        <img src="{{url("storage/$post->image")}}" alt="{{$post->title}}" style="max-width:100px; max-height:100px;">
+        {{$post->title}}
              [ <a href="{{route('posts.show',$post->id)}}">Ver detalhes</a> ]
              [ <a href="{{ route('posts.edit',$post->id) }}">Edit</a> ]
     </p>
@@ -34,3 +40,5 @@
 
 
 
+
+@endsection

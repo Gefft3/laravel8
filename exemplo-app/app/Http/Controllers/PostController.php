@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreUpdatePost;
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
@@ -46,7 +48,18 @@ class PostController extends Controller
         $post->title=$request->title;
         $post->content=$request->content;
         $post->save();*/
-        Post::create($request->all());
+
+        $data = $request->all();
+
+        if($request->image->isvalid()) {
+
+            $nameFile = Str::of($request->title)->slug('-') . '.' .$request->image->getClientOriginalExtension();
+
+            $image = $request->image->storeAs('posts', $nameFile);
+            $data['image']=$image;
+        }
+
+        Post::create($data);
         return redirect()
                         ->route('posts.index')
                         ->with('message', 'Post criado com sucesso!');
@@ -90,14 +103,27 @@ class PostController extends Controller
      */
     public function update(StoreUpdatePost $request, $id)
     {
-        //        //caso tente burlar a url
+        //caso tente burlar a url
         if (!$post = Post::find($id)){
             return redirect()->route('posts.index');
         }
-        $post->update($request->all());
+
+        $data = $request->all();
+
+        if($request->image->isvalid()) {
+            if(Storage::exists($post->image))
+                Storage::delete($post->image);
+
+            $nameFile = Str::of($request->title)->slug('-') . '.' .$request->image->getClientOriginalExtension();
+            $image = $request->image->storeAs('posts', $nameFile);
+            $data['image']=$image;
+        }
+
+        $post->update($data);
+
         return redirect()
-                        ->route('posts.index')
-                        ->with('message', 'Post editado com sucesso!');
+                    ->route('posts.index')
+                    ->with('message', 'Post editado com sucesso!');
     }
 
     /**
@@ -112,6 +138,8 @@ class PostController extends Controller
         if(!$post = Post::find($id)){
             return redirect()->route('posts.index');
         }
+        if(Storage::exists($post->image))
+            Storage::delete($post->image);
         $post->delete();
 
         return redirect()
